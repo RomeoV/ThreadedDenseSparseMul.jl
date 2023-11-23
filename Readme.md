@@ -44,8 +44,8 @@ To compute any given column in $C_{(:,j)}$ of $C$ we are essentially computing a
 
 ## Benchmarking
 For matrices $(N\times K)$ and $(K\times M)$ we fix $N=1'000$ and $K=2'000$ and vary N.
-Here's are the benchmark results, comparing against SparseArrays.jl, which ships with Julia but is single-threaded:
+Here's are the benchmark results, comparing against StaticArrays.jl, which ships with Julia but is single-threaded:
 
 ![scaling benchmark](/benchmark/scaling.png)
 
-For all N we see a speed up over `_spmul!` from the SparseArrays package of up to ~3x for N in [300, 30_000], and ~2x otherwise.
+For all N we see a speed up over `_spmul!` from the StaticArrays package of up to ~3x for N in [300, 30_000], and ~2x otherwise.
