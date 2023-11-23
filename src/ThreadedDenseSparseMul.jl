@@ -1,4 +1,4 @@
-module DenseSparseMul
+module ThreadedDenseSparseMul
 
 import SparseArrays
 import SparseArrays: SparseMatrixCSC, mul!
@@ -12,4 +12,4 @@ function SparseArrays.mul!(C::AbstractMatrix, A::AbstractMatrix, B::SparseMatrix
     return C
 end
 
-end # module DenseSparseMul
+end # module ThreadedDenseSparseMul

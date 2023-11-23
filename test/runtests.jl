@@ -1,4 +1,4 @@
-using DenseSparseMul, SparseArrays
+using ThreadedDenseSparseMul, SparseArrays
 using Test
 import SparseArrays: _spmul!, mul!
 

@@ -7,7 +7,7 @@ For all N we see a speed up, up to approximately 3x for N=30_000.
 
 using SparseArrays, SparseMatricesCSR, ThreadedSparseCSR
 using Plots, StatsPlots, BenchmarkPlots, BenchmarkTools
-using DenseSparseMul  # note that this overwrites the regular mul!
+using ThreadedDenseSparseMul  # note that this overwrites the regular mul!
 import SparseArrays: mul!, findnz
 # import ThreadPinning: pinthreads
 # pinthreads(:cores)
