@@ -2,6 +2,15 @@
 
 > Threaded implementation of dense-sparse matrix multiplication, built on top of `Polyester.jl`.
 
+## Usage
+Just install and import this package, and launch Julia with some threads `e.g. julia --threads=auto`! Then e.g. any of these will be accelerated:
+```julia
+A = rand(1_000, 2_000); B = sprand(2_000, 30_000, 0.05); buf = similar(size(A,1), size(B,2))  # prealloc
+res = A*B
+buf .= A * B
+buf .+= 2 .* A * B
+```
+
 ## Rationale
 I want to do $C \leftarrow D*S$ fast, where $D$ and $S$ are dense and sparse matrices, respectively. However:
 - The SparseArrays.jl package doesn't support threaded multiplication.

@@ -20,6 +20,10 @@ SparseArrays._spmul!(C::Matrix{Float64}, X::Matrix{Float64}, A::SparseMatrixCSC{
     buf .+= lhs * rhs
     @test buf ≈ baseline
 
+    buf .= 0.
+    buf .+= 2.0.*lhs * rhs
+    @test buf/2 ≈ baseline
+
     mul!(buf, lhs, rhs, 1, 0)
     @test buf ≈ baseline
 
