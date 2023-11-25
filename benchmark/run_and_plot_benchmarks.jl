@@ -71,9 +71,9 @@ end
 res2 = run(suite2)
 
 fig = plot(; xaxis=:log10, yaxis=:log2, 
-           title="3x Speedup over StaticArrays.jl", xlabel="M", ylabel="time [ms]",
+           title="3x Speedup over SparseArrays.jl", xlabel="M", ylabel="time [ms]",
            minorgrid=true, xticks=10 .^[2:5...], yticks=2. .^[0:2:12...], dpi=300)
-plot!(fig, M_values, [median(res2[:SparseArrays][M]).time/1e6 for M in M_values], label="StaticArrays.jl", marker=:x)
+plot!(fig, M_values, [median(res2[:SparseArrays][M]).time/1e6 for M in M_values], label="SparseArrays.jl", marker=:x)
 plot!(fig, M_values, [median(res2[:DenseSparseMul][M]).time/1e6 for M in M_values], label="DenseSparseMul.jl", marker=:x)
 savefig(fig, "benchmark/scaling.png")
 savefig(fig, "benchmark/scaling.svg")
