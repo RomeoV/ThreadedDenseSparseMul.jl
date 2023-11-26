@@ -43,12 +43,12 @@ However, as we can see in the code snippet above, the CSC format seems to be rea
 To compute any given column in $C_{(:,j)}$ of $C$ we are essentially computing a weighted sum of columns in $A$, i.e. $C_{(:,j)} = \sum_k \lambda_k \cdot A_{(:,k)}$ which should be very cache efficient and SSE-able.
 
 ## Benchmarking
-For matrices $(N\times K)$ and $(K\times M)$ we fix $N=1'000$ and $K=2'000$ and vary N.
+For matrices $(N\times K)$ and $(K\times M)$ we fix $N=1'000$ and $K=2'000$ and vary M.
 Here's are the benchmark results, comparing against SparseArrays.jl, which ships with Julia but is single-threaded:
 
 ![scaling benchmark](/benchmark/scaling.png)
 
-For all N we see a speed up over `_spmul!` from the SparseArrays package of up to ~2x for N in [300, 30_000].
+For all M we see a speed up over `_spmul!` from the SparseArrays package of up to ~2x for M in [300, 30_000].
 We also compare against `MKLSparse.jl`. However, since MKLSparse only supports `dense x sparse` we first need to allocate spare buffers and transpose the dense matrix (these allocations are not measured in the `no_transpose` variant), and then computing essentially $(B^T A^T)^T$.
 The result is much slower, likely due to the fact that the dense matrix is column-major.
 We also compare against SparseArrays.jl doing the same, where we also see poor performance.
