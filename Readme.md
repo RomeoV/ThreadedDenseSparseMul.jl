@@ -12,11 +12,13 @@ buf .+= 2 .* A * B
 ```
 
 ## Rationale
-I want to do $C \leftarrow D*S$ fast, where $D$ and $S$ are dense and sparse matrices, respectively. However:
+I want to do $C \leftarrow C - D \times S$ fast, where $D$ and $S$ are dense and sparse matrices, respectively.
+Notice how this is different from $C \leftarrow C - S \times D$, i.e. dense $\times$ sparse vs sparse $\times$ dense.
+In particular:
 - The SparseArrays.jl package doesn't support threaded multiplication.
-- The IntelMKL.jl package doesn't seem to support dense $\cdot$ sparsecsc multiplication, although one can get similar performance using that package and transposing appropriately. It also comes with possible licensing issues and is vendor-specifig.
-- The ThreadedSparseCSR.jl package also just supports sparsecsr $\cdot$ dense.
-- The ThreadedSparseArrays.jl package also just supports ThreadedSparseMatrixCSC $\cdot$ dense, and also doesn't install for me currently.
+- The IntelMKL.jl package doesn't seem to support dense $\times$ sparsecsc multiplication, although one can get similar performance using that package and transposing appropriately. It also comes with possible licensing issues and is vendor-specific.
+- The ThreadedSparseCSR.jl package also just supports sparsecsr $\times$ dense.
+- The ThreadedSparseArrays.jl package also just supports ThreadedSparseMatrixCSC $\times$ dense, and also doesn't install for me currently.
 
 I haven't found an implementation for that, so made one myself. In fact, the package `Polyester.jl` makes this super easy, the entire code is basically
 ```julia
