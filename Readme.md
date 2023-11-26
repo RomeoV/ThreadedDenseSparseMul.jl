@@ -48,4 +48,7 @@ Here's are the benchmark results, comparing against SparseArrays.jl, which ships
 
 ![scaling benchmark](/benchmark/scaling.png)
 
-For all N we see a speed up over `_spmul!` from the SparseArrays package of up to ~3x for N in [300, 30_000], and ~2x otherwise.
+For all N we see a speed up over `_spmul!` from the SparseArrays package of up to ~2x for N in [300, 30_000].
+We also compare against `MKLSparse.jl`. However, since MKLSparse only supports `dense x sparse` we first need to allocate spare buffers and transpose the dense matrix (these allocations are not measured in the `no_transpose` variant), and then computing essentially $(B^T A^T)^T$.
+The result is much slower, likely due to the fact that the dense matrix is column-major.
+We also compare against SparseArrays.jl doing the same, where we also see poor performance.
