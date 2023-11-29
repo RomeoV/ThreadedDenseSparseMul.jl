@@ -1,7 +1,7 @@
 module ThreadedDenseSparseMul
 
 import SparseArrays
-import SparseArrays: SparseMatrixCSC, nonzeroinds
+import SparseArrays: SparseMatrixCSC, SparseVector, nonzeroinds, nonzeros, findnz
 import Polyester: @batch
 
 """
@@ -25,6 +25,7 @@ function fastdensesparse_threaded!(C::Matrix{T}, A::Matrix{T}, B::SparseMatrixCS
 end
 
 const VecOrView{T} = Union{Vector{T}, SubArray{T, 1, Matrix{T}}}
+# this one is slightly slower than `fastdensesparse_outer!`, probably because of extra allocations.
 function _fastdensesparse_outer!(C::Matrix{T}, A::VecOrView{T}, b::SparseVector{T}, α::Number, β::Number) where T
     for (j, X_val) in zip(findnz(b)...)
         C[:, j] .*= β
@@ -38,12 +39,12 @@ function fastdensesparse_outer!(C::Matrix{T}, a::VecOrView{T}, b::SparseVector{T
     return C
 end
 
-function fastdensesparse_outer_threaded!(C::Matrix{T}, A::VecOrView{T}, b::SparseVector{T}, α::Number, β::Number) where T
+function fastdensesparse_outer_threaded!(C::Matrix{T}, a::VecOrView{T}, b::SparseVector{T}, α::Number, β::Number) where T
     inds = nonzeroinds(b)
-    nzs = nonzeros(X)
-    @batch for i in inds
-        C[:, i] .*=  β
-        C[:, i] .+=  (α.*nzs[i]).*a
+    nzs = nonzeros(b)
+    @batch for i in axes(nzs, 1)
+        C[:, inds[i]] .*=  β
+        C[:, inds[i]] .+=  (α.*nzs[i]).*a
     end
     return C
 end
