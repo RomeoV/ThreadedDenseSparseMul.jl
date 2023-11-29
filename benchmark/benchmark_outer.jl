@@ -25,7 +25,7 @@ show(res1)
 
 suite = BenchmarkGroup()
 suite[:Float64] = BenchmarkGroup()
-suite[:Float64][:_fastdensesparse_outer!] = @benchmarkable ThreadedDenseSparseMul._fastdensesparse_outer!(buf, @view(lhs[:, 10]), rhs[10, :], 2., 0)
+# suite[:Float64][:_fastdensesparse_outer!] = @benchmarkable ThreadedDenseSparseMul._fastdensesparse_outer!(buf, @view(lhs[:, 10]), rhs[10, :], 2., 0)
 suite[:Float64][:fastdensesparse_outer!] = @benchmarkable ThreadedDenseSparseMul.fastdensesparse_outer!(buf, @view(lhs[:, 10]), rhs[10, :], 2., 0)
 suite[:Float64][:base] = @benchmarkable buf .= @view(lhs[:, 10])*(2. .*rhs[10, :])'
 suite[:Float64][:fastdensesparse_outer_threaded!] = @benchmarkable ThreadedDenseSparseMul.fastdensesparse_outer_threaded!(buf, @view(lhs[:, 10]), rhs[10, :], 2., 0)
@@ -39,12 +39,12 @@ ks = shuffle(1:K)[1:100]
 bufs = [copy(buf) for _ in 1:Threads.nthreads()]
 suite = BenchmarkGroup()
 suite[:Float64] = BenchmarkGroup()
-suite[:Float64][:_fastdensesparse_outer!] = @benchmarkable begin
-    buf = bufs[Threads.threadid()]
-    Threads.@threads :static for k in ks
-        ThreadedDenseSparseMul._fastdensesparse_outer!(buf, @view(lhs[:, k]), rhs[k, :], 2., 0)
-    end
-end
+# suite[:Float64][:_fastdensesparse_outer!] = @benchmarkable begin
+#     buf = bufs[Threads.threadid()]
+#     Threads.@threads :static for k in ks
+#         ThreadedDenseSparseMul._fastdensesparse_outer!(buf, @view(lhs[:, k]), rhs[k, :], 2., 0)
+#     end
+# end
 suite[:Float64][:fastdensesparse_outer!] = @benchmarkable begin
     buf = bufs[Threads.threadid()]
     Threads.@threads :static for k in ks
