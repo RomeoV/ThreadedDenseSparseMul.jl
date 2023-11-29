@@ -47,7 +47,8 @@ Fast outer product when computing `C .= β*C + α * a*b'`, but way faster than B
 Also see `fastdensesparse_outer_threaded!` for a multi-threaded version using `Polyester.jl`.
 """
 function fastdensesparse_outer!(C::MatOrView{T}, a::VecOrView{T}, b::SparseVector{T}, α::Number, β::Number) where T
-    C[:, nonzeroinds(b)] .+=  a * nonzeros(b)'
+    C[:, nonzeroinds(b)] .*=  β
+    C[:, nonzeroinds(b)] .+=  a * (α.*nonzeros(b))'
     return C
 end
 
