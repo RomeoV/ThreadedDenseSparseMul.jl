@@ -4,19 +4,34 @@ import SparseArrays
 import SparseArrays: SparseMatrixCSC, SparseVector, nonzeroinds, nonzeros, findnz
 import Polyester: @batch
 
+export fastdensesparse!, fastdensesparse_threaded!
+export fastdensesparse_outer!, fastdensesparse_outer_threaded!
+
+const VecOrView{T} = Union{Vector{T}, SubArray{T, 1, Matrix{T}}}
+const MatOrView{T} = Union{Matrix{T}, SubArray{T, 2, Matrix{T}}}
+
 """
     fastdensesparse!(C, A, B, α, β)
 
-BLAS like interface, computing `C .= β*C + α*A*B`, but accelerated with multi-threading using `Polyester.jl`.
+BLAS like interface, computing `C .= β*C + α*A*B`, but way faster than Base would.
+
+Also see `fastdensesparse_threaded!` for a multi-threaded version using `Polyester.jl`.
 """
-function fastdensesparse!(C::Matrix{T}, A::Matrix{T}, B::SparseMatrixCSC{T}, α::Number, β::Number) where T
+function fastdensesparse!(C::MatOrView{T}, A::MatOrView{T}, B::SparseMatrixCSC{T}, α::Number, β::Number) where T
     for j in axes(B, 2)
         C[:, j] .*= β
         C[:, j] .+= A * (α.*B[:, j])
     end
     return C
 end
-function fastdensesparse_threaded!(C::Matrix{T}, A::Matrix{T}, B::SparseMatrixCSC{T}, α::Number, β::Number) where T
+
+"""
+    fastdensesparse!(C, A, B, α, β)
+
+Threaded, BLAS like interface, computing `C .= β*C + α*A*B`, but way faster than Base would.
+Also see `fastdensesparse!` for a single-threaded version.
+"""
+function fastdensesparse_threaded!(C::MatOrView{T}, A::MatOrView{T}, B::SparseMatrixCSC{T}, α::Number, β::Number) where T
     @batch for j in axes(B, 2)
         C[:, j] .*= β
         C[:, j] .+= A * (α.*B[:, j])
@@ -24,22 +39,27 @@ function fastdensesparse_threaded!(C::Matrix{T}, A::Matrix{T}, B::SparseMatrixCS
     return C
 end
 
-const VecOrView{T} = Union{Vector{T}, SubArray{T, 1, Matrix{T}}}
-# this one is slightly slower than `fastdensesparse_outer!`, probably because of extra allocations.
-function _fastdensesparse_outer!(C::Matrix{T}, A::VecOrView{T}, b::SparseVector{T}, α::Number, β::Number) where T
-    for (j, X_val) in zip(findnz(b)...)
-        C[:, j] .*= β
-        C[:, j] .+=  (α*X_val) .* A  # this compiles to something similar to axpy!, i.e. no allocations. Notice we need the dot also for the scalar mul.
-    end
-    return C
-end
+"""
+    fastdensesparse_outer!(C, a, b, α, β)
 
-function fastdensesparse_outer!(C::Matrix{T}, a::VecOrView{T}, b::SparseVector{T}, α::Number, β::Number) where T
+Fast outer product when computing `C .= β*C + α * a*b'`, but way faster than Base would.
+- `a` is a dense vector (or view), `b` is a sparse vector, `C` is a dense matrix (or view).
+Also see `fastdensesparse_outer_threaded!` for a multi-threaded version using `Polyester.jl`.
+"""
+function fastdensesparse_outer!(C::MatOrView{T}, a::VecOrView{T}, b::SparseVector{T}, α::Number, β::Number) where T
     C[:, nonzeroinds(b)] .+=  a * nonzeros(b)'
     return C
 end
 
-function fastdensesparse_outer_threaded!(C::Matrix{T}, a::VecOrView{T}, b::SparseVector{T}, α::Number, β::Number) where T
+"""
+    fastdensesparse_outer_threaded!(C, a, b, α, β)
+
+Threaded, fast outer product when computing `C .= β*C + α * a*b'`, but way faster than Base would, using `Polyester.jl`.
+- `a` is a dense vector (or view), `b` is a sparse vector, `C` is a dense matrix (or view).
+
+Also see `fastdensesparse_outer!` for a single-threaded version.
+"""
+function fastdensesparse_outer_threaded!(C::MatOrView{T}, a::VecOrView{T}, b::SparseVector{T}, α::Number, β::Number) where T
     inds = nonzeroinds(b)
     nzs = nonzeros(b)
     @batch for i in axes(nzs, 1)
@@ -48,7 +68,5 @@ function fastdensesparse_outer_threaded!(C::Matrix{T}, a::VecOrView{T}, b::Spars
     end
     return C
 end
-
-
 
 end # module ThreadedDenseSparseMul
