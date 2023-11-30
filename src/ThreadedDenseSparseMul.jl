@@ -18,11 +18,13 @@ BLAS like interface, computing `C .= β*C + α*A*B`, but way faster than Base wo
 Also see `fastdensesparsemul_threaded!` for a multi-threaded version using `Polyester.jl`.
 """
 function fastdensesparsemul!(C::MatOrView{T}, A::MatOrView{T}, B::SparseMatrixCSC{T}, α::Number, β::Number) where T
-    for j in axes(B, 2)
-        C[:, j] .*= β
-        C[:, j] .+= A * (α.*B[:, j])
+    @fastmath @inbounds begin
+        C .*= β
+        for j in axes(B, 2)
+            C[:, j] .+= A * (α.*B[:, j])
+        end
+        return C
     end
-    return C
 end
 
 """
@@ -32,11 +34,13 @@ Threaded, BLAS like interface, computing `C .= β*C + α*A*B`, but way faster th
 Also see `fastdensesparsemul!` for a single-threaded version.
 """
 function fastdensesparsemul_threaded!(C::MatOrView{T}, A::MatOrView{T}, B::SparseMatrixCSC{T}, α::Number, β::Number) where T
-    @batch for j in axes(B, 2)
-        C[:, j] .*= β
-        C[:, j] .+= A * (α.*B[:, j])
+    @fastmath @inbounds begin
+        C .*= β
+        @batch for j in axes(B, 2)
+            C[:, j] .+= A * (α.*B[:, j])
+        end
+        return C
     end
-    return C
 end
 
 """
@@ -47,9 +51,11 @@ Fast outer product when computing `C .= β*C + α * a*b'`, but way faster than B
 Also see `fastdensesparsemul_outer_threaded!` for a multi-threaded version using `Polyester.jl`.
 """
 function fastdensesparsemul_outer!(C::MatOrView{T}, a::VecOrView{T}, b::SparseVector{T}, α::Number, β::Number) where T
-    C[:, nonzeroinds(b)] .*=  β
-    C[:, nonzeroinds(b)] .+=  a * (α.*nonzeros(b))'
-    return C
+    @fastmath @inbounds begin
+        C .*=  β
+        C[:, nonzeroinds(b)] .+=  a * (α.*nonzeros(b)')
+        return C
+    end
 end
 
 """
@@ -61,13 +67,15 @@ Threaded, fast outer product when computing `C .= β*C + α * a*b'`, but way fas
 Also see `fastdensesparsemul_outer!` for a single-threaded version.
 """
 function fastdensesparsemul_outer_threaded!(C::MatOrView{T}, a::VecOrView{T}, b::SparseVector{T}, α::Number, β::Number) where T
-    inds = nonzeroinds(b)
-    nzs = nonzeros(b)
-    @batch for i in axes(nzs, 1)
-        C[:, inds[i]] .*=  β
-        C[:, inds[i]] .+=  (α.*nzs[i]).*a
+    @fastmath @inbounds begin
+        inds = nonzeroinds(b)
+        nzs = nonzeros(b)
+        C .*=  β
+        @batch for i in axes(nzs, 1)
+            C[:, inds[i]] .+=  (α*nzs[i]).*a
+        end
+        return C
     end
-    return C
 end
 
 end # module ThreadedDenseSparseMul
