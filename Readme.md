@@ -6,10 +6,14 @@
 Just install and import this package, and launch Julia with some threads `e.g. julia --threads=auto`! Then e.g. any of these will be accelerated:
 ```julia
 A = rand(1_000, 2_000); B = sprand(2_000, 30_000, 0.05); buf = similar(size(A,1), size(B,2))  # prealloc
-res = A*B
-buf .= A * B
-buf .+= 2 .* A * B
+fastdensesparsemul!(buf, A, B, 1, 0)
+fastdensesparsemul_threaded!(buf, A, B, 1, 0)
+fastdensesparsemul_outer!(buf, @view(A[:, 1]), B[1,:], 1, 0)
+fastdensesparsemul_outer_threaded!(buf, @view(A[:, 1]), B[1,:], 1, 0)
 ```
+
+The interface is adapted from the 5-parameter definition used by `mul!` and also BLAS.
+Previously we tried to overload the `mul!` operator, which comes with some nice syntactic convenience, but it lead to some downstream problems with package precompilation, and checking whether our implementation is actually used.
 
 ## Rationale
 I want to do $C \leftarrow C - D \times S$ fast, where $D$ and $S$ are dense and sparse matrices, respectively.
@@ -25,7 +29,7 @@ I haven't found an implementation for that, so made one myself. In fact, the pac
 import SparseArrays: SparseMatrixCSC, mul!; import SparseArrays
 import Polyester: @batch
 
-function SparseArrays.mul!(C::AbstractMatrix, A::AbstractMatrix, B::SparseMatrixCSC, α::Number, β::Number)
+function fastdensesparsemul_threaded!(C::AbstractMatrix, A::AbstractMatrix, B::SparseMatrixCSC, α::Number, β::Number)
     @batch for j in axes(B, 2)
         C[:, j] .*= β
         C[:, j] .+= A * (α.*B[:, j])
@@ -34,9 +38,7 @@ function SparseArrays.mul!(C::AbstractMatrix, A::AbstractMatrix, B::SparseMatrix
 end
 ```
 
-Julia will automatically use this 5-parameter definition to generate `mul!(C, A, B)` and calls like `C .+= A*B` and so forth.
-
-Notice that this approach doesn't make sense for matrix-vector multiplication (the loop would just have one element), so that case is not considered in this package.
+Notice that this approach doesn't make sense for matrix-vector multiplication (the loop would just have one element), so that case is not considered in this package, however it does make sense for outer producs.
 
 
 ### Note on column-major and CSC vs CSR
