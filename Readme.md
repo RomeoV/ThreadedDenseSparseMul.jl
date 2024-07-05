@@ -1,4 +1,7 @@
 # ThreadedDenseSparseMul.jl
+[![Docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://romeov.github.io/ThreadedDenseSparseMul.jl/dev/)
+[![Build Status](https://github.com/JuliaCI/BenchmarkTools.jl/workflows/CI/badge.svg)](https://github.com/JuliaCI/BenchmarkTools.jl/actions/workflows/CI.yml?query=branch%3Amaster)
+[![codecov](https://codecov.io/gh/RomeoV/ProbabilisticParameterEstimators.jl/graph/badge.svg?token=5J82UXPL8I)](https://codecov.io/gh/RomeoV/ThreadedDenseSparseMul.jl)
 
 > Threaded implementation of dense-sparse matrix multiplication, built on top of `Polyester.jl`.
 
