@@ -18,7 +18,7 @@ BLAS like interface, computing `C .= β*C + α*A*B`, but way faster than Base wo
 Also see `fastdensesparsemul_threaded!` for a multi-threaded version using `Polyester.jl`.
 """
 function fastdensesparsemul!(C::MatOrView{T}, A::MatOrView{T}, B::SparseMatrixCSC{T}, α::Number, β::Number) where T
-    @fastmath @inbounds begin
+    @inbounds begin
         C .*= β
         for j in axes(B, 2)
             C[:, j] .+= A * (α.*B[:, j])
@@ -34,7 +34,7 @@ Threaded, BLAS like interface, computing `C .= β*C + α*A*B`, but way faster th
 Also see `fastdensesparsemul!` for a single-threaded version.
 """
 function fastdensesparsemul_threaded!(C::MatOrView{T}, A::MatOrView{T}, B::SparseMatrixCSC{T}, α::Number, β::Number) where T
-    @fastmath @inbounds begin
+    @inbounds begin
         C .*= β
         @batch for j in axes(B, 2)
             C[:, j] .+= A * (α.*B[:, j])
@@ -51,7 +51,7 @@ Fast outer product when computing `C .= β*C + α * a*b'`, but way faster than B
 Also see `fastdensesparsemul_outer_threaded!` for a multi-threaded version using `Polyester.jl`.
 """
 function fastdensesparsemul_outer!(C::MatOrView{T}, a::VecOrView{T}, b::SparseVector{T}, α::Number, β::Number) where T
-    @fastmath @inbounds begin
+    @inbounds begin
         C .*=  β
         C[:, nonzeroinds(b)] .+=  a * (α.*nonzeros(b)')
         return C
@@ -67,7 +67,7 @@ Threaded, fast outer product when computing `C .= β*C + α * a*b'`, but way fas
 Also see `fastdensesparsemul_outer!` for a single-threaded version.
 """
 function fastdensesparsemul_outer_threaded!(C::MatOrView{T}, a::VecOrView{T}, b::SparseVector{T}, α::Number, β::Number) where T
-    @fastmath @inbounds begin
+    @inbounds begin
         inds = nonzeroinds(b)
         nzs = nonzeros(b)
         C .*=  β
