@@ -19,6 +19,7 @@ SparseArrays = "1"
 Profile = "9abbd945-dff8-562f-b5e8-e1ebf5ef1b79"
 StrideArraysCore = "7792a7ef-975c-4747-a70f-980b88e8d1da"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 
 [targets]
-test = ["Test", "Profile"]
+test = ["Test", "Profile", "Aqua"]
