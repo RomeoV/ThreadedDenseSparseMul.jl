@@ -37,7 +37,26 @@ fastdensesparsemul_outer!(buf, @view(A[:, 1]), B[1,:], 1, 0)
 fastdensesparsemul_outer_threaded!(buf, @view(A[:, 1]), B[1,:], 1, 0)
 ```
 
-The interface is adapted from the 5-parameter definition used by `mul!` and BLAS.
+The interface is adapted from the 5-parameter definition used by `mul!` and BLAS. 
+
+To instead override `mul!` directly so you can run `C = A*B`, see the next section.
+
+### Overriding `mul!` with Type Piracy ‍☠️
+If you are aware of the [consequences](https://docs.julialang.org/en/v1/manual/style-guide/#Avoid-type-piracy), you can also commit type piracy (harrrr!) and override `mul!` and `(*)` by calling
+```julia
+ThreadedDenseSparseMul.override_mul!()  # threaded
+# or
+ThreadedDenseSparseMul.override_mul!(false)  # non-threaded
+```
+
+Then, you can just run e.g.
+```julia
+D = rand(100, 200); S = sprand(200, 500, 0.1);
+C = D*S
+C .+= D[:, 1] * (S[:,1]')
+```
+and the two multiplication call will dispatch to use this library (through the `mul!` and `(*)`*dispatch, respectively).
+Since the outer product doesn't use the `mul!` syntax by default though, you can still manually call `threadeddensesparse_outer!(C, D[:, 1], S[1, :])` to avoid an extra allocation.
 
 ## API Reference
 ```@autodocs
