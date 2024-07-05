@@ -17,6 +17,7 @@ function run_common_tests(method!, buf::AbstractMatrix{T}, lhs, rhs, α, β, bas
 end
 
 @testset "ThreadedDenseSparseMul Tests" begin
+    @test ThreadedDenseSparseMul.get_num_threads() == Threads.nthreads()
     @testset "Dense-Sparse Multiplication" begin
         @testset "$T type" for T in [Float64, Float32]
             @testset "$method! implementation" for method! in [fastdensesparsemul!, fastdensesparsemul_threaded!]
