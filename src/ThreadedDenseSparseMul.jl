@@ -40,7 +40,7 @@ Threaded, BLAS like interface, computing `C .= β*C + α*A*B`, but way faster th
 Also see `fastdensesparsemul!` for a single-threaded version.
 """
 function fastdensesparsemul_threaded!(C::MatOrView{T}, A::MatOrView{T}, B::SparseMatrixCSC{T}, α::Number, β::Number) where T
-    minbatch = size(B, 2) ÷ matmul_num_threads[]
+    minbatch = max(size(B, 2) ÷ matmul_num_threads[], 1)
     @inbounds begin
         C .*= β
         @batch minbatch=minbatch for j in axes(B, 2)
@@ -77,7 +77,7 @@ function fastdensesparsemul_outer_threaded!(C::MatOrView{T}, a::VecOrView{T}, b:
     @inbounds begin
         inds = nonzeroinds(b)
         nzs = nonzeros(b)
-        minbatch = size(nzs, 1) ÷ matmul_num_threads[]
+        minbatch = max(size(nzs, 1) ÷ matmul_num_threads[], 1)
         C .*=  β
         @batch minbatch=minbatch for i in axes(nzs, 1)
             C[:, inds[i]] .+=  (α*nzs[i]).*a
