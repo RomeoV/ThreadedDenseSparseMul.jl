@@ -7,6 +7,12 @@ import Polyester: @batch
 export fastdensesparsemul!, fastdensesparsemul_threaded!
 export fastdensesparsemul_outer!, fastdensesparsemul_outer_threaded!
 
+# Adapted from https://github.com/BacAmorim/ThreadedSparseCSR.jl/tree/main
+include("set_num_threads.jl")
+function __init__()
+    set_num_threads(Threads.nthreads())
+end
+
 const VecOrView{T} = Union{Vector{T}, SubArray{T, 1, Matrix{T}}}
 const MatOrView{T} = Union{Matrix{T}, SubArray{T, 2, Matrix{T}}}
 
@@ -34,9 +40,10 @@ Threaded, BLAS like interface, computing `C .= β*C + α*A*B`, but way faster th
 Also see `fastdensesparsemul!` for a single-threaded version.
 """
 function fastdensesparsemul_threaded!(C::MatOrView{T}, A::MatOrView{T}, B::SparseMatrixCSC{T}, α::Number, β::Number) where T
+    minbatch = size(B, 2) ÷ matmul_num_threads[]
     @inbounds begin
         C .*= β
-        @batch for j in axes(B, 2)
+        @batch minbatch=minbatch for j in axes(B, 2)
             C[:, j] .+= A * (α.*B[:, j])
         end
         return C
@@ -70,8 +77,9 @@ function fastdensesparsemul_outer_threaded!(C::MatOrView{T}, a::VecOrView{T}, b:
     @inbounds begin
         inds = nonzeroinds(b)
         nzs = nonzeros(b)
+        minbatch = size(nzs, 1) ÷ matmul_num_threads[]
         C .*=  β
-        @batch for i in axes(nzs, 1)
+        @batch minbatch=minbatch for i in axes(nzs, 1)
             C[:, inds[i]] .+=  (α*nzs[i]).*a
         end
         return C
