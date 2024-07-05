@@ -9,9 +9,11 @@ export fastdensesparsemul_outer!, fastdensesparsemul_outer_threaded!
 
 # Adapted from https://github.com/BacAmorim/ThreadedSparseCSR.jl/tree/main
 include("set_num_threads.jl")
+include("override.jl")
 function __init__()
     set_num_threads(Threads.nthreads())
 end
+
 
 const VecOrView{T} = Union{Vector{T}, SubArray{T, 1, Matrix{T}}}
 const MatOrView{T} = Union{Matrix{T}, SubArray{T, 2, Matrix{T}}}
