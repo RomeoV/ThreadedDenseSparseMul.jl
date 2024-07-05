@@ -1,0 +1,4 @@
+[deps]
+DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+ThreadedDenseSparseMul = "3d91a4ae-1078-4a13-9dfb-76f34bf57907"
