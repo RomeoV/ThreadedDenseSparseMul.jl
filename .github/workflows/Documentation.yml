@@ -1,11 +1,9 @@
 name: Documentation
 on:
-  push:
+  push:  # Triggered on push events
     branches:
-      - main
-    tags: '*'
-  pull_request:
-
+      - master  # Only runs when pushing to the master branch
+    tags: ['*']  # Also runs when any tag is pushed
 jobs:
   Documenter:
     permissions:
