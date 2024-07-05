@@ -25,6 +25,7 @@ To use ThreadedDenseSparseMul.jl, simply install and import the package, and lau
 
 ```julia
 using ThreadedDenseSparseMul
+# ^ will call ThreadedDenseSparseMul.set_num_threads(Threads.nthreads) during `__init__`
 using SparseArrays
 
 A = rand(1_000, 2_000)
