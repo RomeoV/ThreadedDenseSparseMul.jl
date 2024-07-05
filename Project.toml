@@ -1,7 +1,7 @@
 name = "ThreadedDenseSparseMul"
 uuid = "3d91a4ae-1078-4a13-9dfb-76f34bf57907"
 authors = ["Romeo Valentin <romeov@stanford.edu>"]
-version = "0.5.0"
+version = "0.5.1"
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
